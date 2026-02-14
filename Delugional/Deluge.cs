@@ -13,6 +13,7 @@ namespace Delugional
         Task<bool> RemoveTorrentAsync(string torrentId, bool removeData = false);
         Task<object[]> RemoveTorrentsAsync(string[] torrentIds, bool removeData = false);
         Task<string[]> GetMethodListAsync();
+        Task<object> GetSessionStatusAsync(string[] keys);
         Task<IDictionary<string, object>> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false);
         Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false);
     }
@@ -72,6 +73,12 @@ namespace Delugional
         }
 
         public virtual Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public virtual Task<object> GetSessionStatusAsync(string[] keys)
         {
             throw new NotImplementedException();
         }

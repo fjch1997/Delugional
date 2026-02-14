@@ -130,9 +130,9 @@ namespace Delugional.Rpc
 
         public override async Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false)
         {
-            Dictionary<object, object> filters = filter.ToDictionary().ToObjectDictionary();
+            Dictionary<object, object> filters = filter != null ? filter.ToDictionary().ToObjectDictionary() : new Dictionary<object, object>();
 
-            object result = await CallAsync("core.get_torrents_status", filters, statusKeys.ToObjectArray(), diff);
+            object result = await CallAsync("core.get_torrents_status", filters, statusKeys != null ? statusKeys.ToObjectArray() : new object[0], diff);
             if (result == null)
                 return null;
 
@@ -168,6 +168,11 @@ namespace Delugional.Rpc
             object result = await CallAsync("core.remove_torrent", torrentId, removeData);
 
             return result is bool && (bool)result;
+        }
+
+        public override async Task<object> GetSessionStatusAsync(string[] keys)
+        {
+            return await CallAsync("core.get_session_status", (object)keys);
         }
 
         public override async Task<object[]> RemoveTorrentsAsync(string[] torrentIds, bool removeData = false)
@@ -249,7 +254,12 @@ namespace Delugional.Rpc
                 }
 
                 await Connection.Send(requests);
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+#if DEBUG
+                // No timeout while debugging.
+                var cts = new CancellationTokenSource();
+#else
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+#endif
                 RpcMessage[] messages = await Task.WhenAll(tcss.Select(tcs => tcs.Task)).WaitAsync(cts.Token);
 
                 IEnumerable<RpcResponse> responses = CheckResponses(messages);
