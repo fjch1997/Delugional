@@ -1,120 +1,101 @@
-﻿using System;
+﻿using Delugional.Rpc;
+using Delugional.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Delugional
 {
-    public interface IDeluge : IDisposable
+    public class Deluge : DelugeRpc
     {
-        Task<string> AddTorrentAsync(string fileName, byte[] fileDump, IDictionary<string, object> options = null);
-        Task<string> AddMagnetAsync(string url, IDictionary<string, object> options = null);
-
-        Task<bool> RemoveTorrentAsync(string torrentId, bool removeData = false);
-        Task<object[]> RemoveTorrentsAsync(string[] torrentIds, bool removeData = false);
-        Task<string[]> GetMethodListAsync();
-        Task<object> GetSessionStatusAsync(string[] keys);
-        Task<IDictionary<string, object>> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false);
-        Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false);
-    }
-
-    public abstract class Deluge : IDeluge
-    {
-        private bool disposed;
-
-        public virtual Task<string> AddTorrentAsync(string fileName, byte[] fileDump, IDictionary<string, object> options = null)
+        public Deluge(DelugeRpcConnection connection) : base(connection)
         {
-            throw new NotImplementedException();
         }
 
-        public virtual Task<string> AddMagnetAsync(string url, IDictionary<string, object> dictionary = null)
+        public async Task<string> AddMagnetAsync(string url, IDictionary<string, object> options = null)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentException("Argument is null or whitespace", nameof(url));
+
+            return await CallAsync("core.add_torrent_magnet", url, options?.ToObjectDictionary()) as string;
         }
 
-        public virtual Task<bool> RemoveTorrentAsync(string torrentId, bool removeData = false)
+        public async Task<string> AddTorrentAsync(string fileName, byte[] fileDump, IDictionary<string, object> options = null)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentException("Argument is null or whitespace", nameof(fileName));
+            if (fileDump == null)
+                throw new ArgumentNullException(nameof(fileDump));
+            if (fileDump.Length == 0)
+                throw new ArgumentException("Argument is empty collection", nameof(fileDump));
+
+            string fileContents = Base64.Encode(fileDump);
+
+            return await CallAsync("core.add_torrent_file", fileName, fileContents, options?.ToObjectDictionary()) as string;
         }
 
-        public virtual async Task<object[]> RemoveTorrentsAsync(string[] torrentIds, bool removeData = false)
+        public async Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false)
         {
-            var errors = new List<string[]>();
+            Dictionary<object, object> filters = filter != null ? filter.ToDictionary().ToObjectDictionary() : new Dictionary<object, object>();
 
-            foreach (string torrentId in torrentIds)
+            object result = await CallAsync("core.get_torrents_status", filters, statusKeys != null ? statusKeys.ToObjectArray() : new object[0], diff);
+            if (result == null)
+                return null;
+
+            var dict = new Dictionary<string, IDictionary<string, object>>();
+            var torrents = (Dictionary<object, object>)result;
+            foreach (var torrent in torrents)
             {
-                bool removed = await RemoveTorrentAsync(torrentId, removeData);
-                if (!removed)
-                    errors.Add(new[] { torrentId, "Failed to remove torrent"});
+                var torrentId = (string)torrent.Key;
+                var statuses = (Dictionary<object, object>)torrent.Value;
+
+                dict[torrentId] = statuses.ToDictionary(s => (string)s.Key, s => s.Value);
             }
 
-            return errors.ToArray();
+            return dict;
         }
 
-        public virtual Task<string[]> GetMethodListAsync()
+        public async Task<IDictionary<string, object>> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(torrentId))
+                throw new ArgumentException("Argument is null or whitespace", nameof(torrentId));
+
+            object result = await CallAsync("core.get_torrent_status", torrentId, statusKeys.ToObjectArray(), diff);
+
+            var statuses = (Dictionary<object, object>)result;
+            return statuses?.ToDictionary(s => (string)s.Key, s => s.Value);
         }
 
-        public virtual async Task<IDictionary<string, object>> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false)
+        public async Task<bool> RemoveTorrentAsync(string torrentId, bool removeData = false)
         {
-            // Create a filter for the torrent id
-            var filter = new Filter
-            {
-                Ids = new HashSet<string>
-                {
-                    torrentId
-                }
-            };
+            if (string.IsNullOrWhiteSpace(torrentId))
+                throw new ArgumentException("Argument is null or whitespace", nameof(torrentId));
 
-            IDictionary<string, IDictionary<string, object>> torrents = await GetTorrentsStatusAsync(filter, statusKeys, diff);
+            object result = await CallAsync("core.remove_torrent", torrentId, removeData);
 
-            return torrents?.FirstOrDefault().Value;
+            return result is bool && (bool)result;
         }
 
-        public virtual Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false)
+        public async Task<object> GetSessionStatusAsync(string[] keys)
         {
-            throw new NotImplementedException();
+            return await CallAsync("core.get_session_status", (object)keys);
         }
 
-
-        public virtual Task<object> GetSessionStatusAsync(string[] keys)
+        public async Task<object[]> RemoveTorrentsAsync(string[] torrentIds, bool removeData = false)
         {
-            throw new NotImplementedException();
+            if (torrentIds == null)
+                throw new ArgumentNullException(nameof(torrentIds));
+            if (torrentIds.Length == 0)
+                throw new ArgumentException("Argument is empty collection", nameof(torrentIds));
+
+            return await CallAsync("core.remove_torrents", torrentIds.ToObjectArray(), removeData) as object[];
         }
 
-        public virtual void Close()
+        public async Task<string[]> GetMethodListAsync()
         {
-        }
-
-        public void Dispose()
-        {
-            if (disposed)
-                return;
-
-            Dispose(true);
-            GC.SuppressFinalize(this);
-
-            disposed = true;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposing)
-                return;
-
-            Close();
-        }
-
-        protected void CheckDisposed()
-        {
-            if (disposed)
-                throw new ObjectDisposedException(GetType().Name);
-        }
-
-        ~Deluge()
-        {
-            Dispose(false);
+            var result = await CallAsync("daemon.get_method_list");
+            return ((object[])result).Cast<string>().ToArray();
         }
     }
 }

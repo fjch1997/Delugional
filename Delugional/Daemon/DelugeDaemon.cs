@@ -7,13 +7,11 @@ using Delugional.Utility;
 
 namespace Delugional.Daemon
 {
-    public class DelugeDaemon : IDelugeDaemon
+    public class DelugeDaemon : IDisposable
     {
-        public static IDelugeDaemon Default { get; } = new DelugeDaemon();
+        public static DelugeDaemon Default { get; } = new DelugeDaemon();
 
         private readonly string pathToDaemon;
-
-        private bool disposed;
 
         public DelugeDaemon(string pathToDaemon = null)
         {
@@ -60,16 +58,16 @@ namespace Delugional.Daemon
             Process.WaitForExit();
         }
 
-        public IDelugeRpc OpenRpc()
+        public Deluge OpenRpc()
         {
             return OpenRpcAsync().Result;
         }
 
-        public async Task<IDelugeRpc> OpenRpcAsync()
+        public async Task<Deluge> OpenRpcAsync()
         {
-            var connection = new DelugeRpcConnectionV3();
+            var connection = new DelugeRpcConnection();
             await connection.OpenAsync();
-            return new DelugeRpc(connection);
+            return new Deluge(connection);
         }
 
         private static string FindDefaultDaemon()
@@ -91,27 +89,7 @@ namespace Delugional.Daemon
 
         public void Dispose()
         {
-            if (disposed)
-                return;
-
-            Dispose(true);
-            GC.SuppressFinalize(this);
-
-            disposed = true;
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!disposing)
-                return;
-
-            Process?.Close();
-            Process = null;
-        }
-
-        ~DelugeDaemon()
-        {
-            Dispose(false);
+            Process.Dispose();
         }
     }
 }

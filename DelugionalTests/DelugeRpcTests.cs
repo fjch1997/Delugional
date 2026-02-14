@@ -1,6 +1,5 @@
 ﻿using Delugional;
 using Delugional.Daemon;
-using Delugional.Rpc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +11,7 @@ namespace DelugionalTests
     [TestClass]
     public class DelugeRpcTests
     {
-        private IDelugeDaemon daemon;
+        private DelugeDaemon daemon;
         private User user = AuthFile.OpenDefault().First();
 
         [TestInitialize]
@@ -32,28 +31,13 @@ namespace DelugionalTests
         [TestMethod]
         public async Task AddTorrentFile()
         {
-            using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
+            using (var deluge = await daemon.OpenRpcAsync())
             {
                 await deluge.LoginAsync(user.Username, user.Password);
 
                 string torrentId = await deluge.AddTorrentAsync("torrent_file", await File.ReadAllBytesAsync("ubuntu-24.04.4-desktop-amd64.iso.torrent"));
 
                 await deluge.RemoveTorrentAsync(torrentId);
-
-                Assert.IsNotNull(torrentId, "torrentId != null");
-            }
-        }
-
-        [TestMethod]
-        public async Task AddMagnetLink()
-        {
-            using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
-            {
-                await deluge.LoginAsync(user.Username, user.Password);
-
-                string torrentId = await deluge.AddMagnetAsync(Resources.MagnetLink1);
-
-                await deluge.RemoveTorrentAsync(torrentId, true);
 
                 Assert.IsNotNull(torrentId, "torrentId != null");
             }
@@ -69,7 +53,7 @@ namespace DelugionalTests
             return magnetLink.Substring(hashStartIndex, hashEndIndex - hashStartIndex);
         }
 
-        private async Task<string> AddMagnetAsync(IDelugeRpc deluge)
+        private async Task<string> AddMagnetAsync(Deluge deluge)
         {
             var existingTorrents = await deluge.GetTorrentsStatusAsync(new Filter { Keywords = { ParseHashFromMagnetLink(Resources.MagnetLink1) } });
             if (existingTorrents.Count > 0)
@@ -83,7 +67,7 @@ namespace DelugionalTests
         [TestMethod]
         public async Task GetTorrentStatus()
         {
-            using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
+            using (var deluge = await daemon.OpenRpcAsync())
             {
                 await deluge.LoginAsync(user.Username, user.Password);
                 var torrentId = await AddMagnetAsync(deluge);
@@ -106,7 +90,7 @@ namespace DelugionalTests
         [TestMethod]
         public async Task GetMethodList()
         {
-            using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
+            using (var deluge = await daemon.OpenRpcAsync())
             {
                 await deluge.LoginAsync(user.Username, user.Password);
                 string[] methodList = await deluge.GetMethodListAsync();
@@ -118,7 +102,7 @@ namespace DelugionalTests
         [TestMethod]
         public async Task GetSessionStatus()
         {
-            using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
+            using (var deluge = await daemon.OpenRpcAsync())
             {
                 await deluge.LoginAsync(user.Username, user.Password);
                 await AddMagnetAsync(deluge);

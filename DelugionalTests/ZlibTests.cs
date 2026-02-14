@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Delugional.Utility;
+﻿using Delugional.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using rencodesharp;
 

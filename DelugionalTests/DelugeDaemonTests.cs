@@ -1,6 +1,4 @@
-﻿using System;
-using Delugional;
-using Delugional.Daemon;
+﻿using Delugional.Daemon;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DelugionalTests
@@ -11,7 +9,7 @@ namespace DelugionalTests
         [TestMethod]
         public void Default()
         {
-            IDelugeDaemon daemon = DelugeDaemon.Default;
+            var daemon = DelugeDaemon.Default;
 
             Assert.IsNotNull(daemon);
         }

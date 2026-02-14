@@ -3,27 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Delugional.Utility;
 
 namespace Delugional.Rpc
 {
-    public interface IDelugeRpc : IDeluge
-    {
-        Task<object> CallAsync(string method, params object[] args);
-        Task<object> CallAsync(int id, string method, params object[] args);
-        Task<object> CallAsync(string method, IDictionary<string, object> kwargs, params object[] args);
-        Task<object> CallAsync(int id, string method, IDictionary<string, object> kwargs, params object[] args);
-        Task<object> CallAsync(RpcRequest request);
-        Task<object[]> CallAsync(params RpcRequest[] requests);
-        Task<object[]> CallAsync(IEnumerable<RpcRequest> requests);
-        Task<AuthLevels> LoginAsync(string username, string password);
-    }
-
-    public class DelugeRpc : Deluge, IDelugeRpc
+    public abstract class DelugeRpc : IDisposable
     {
         private readonly Dictionary<int, TaskCompletionSource<RpcMessage>> tasks = new Dictionary<int, TaskCompletionSource<RpcMessage>>();
 
-        public DelugeRpc(IDelugeRpcConnection connection)
+        internal DelugeRpc(DelugeRpcConnection connection)
         {
             if (!connection.IsOpen)
                 throw new InvalidOperationException("Connection not open");
@@ -33,15 +20,14 @@ namespace Delugional.Rpc
             BeginReceiving();
         }
 
-        public IDelugeRpcConnection Connection { get; }
+        public DelugeRpcConnection Connection { get; }
 
-        public override void Close()
+        public void Close()
         {
             Connection.Close();
-            Connection.Dispose();
         }
 
-        protected RpcResponse CheckResponse(RpcMessage result)
+        private RpcResponse CheckResponse(RpcMessage result)
         {
             var error = result as RpcError;
             if (error != null)
@@ -50,7 +36,7 @@ namespace Delugional.Rpc
             return (RpcResponse)result;
         }
 
-        protected IEnumerable<RpcResponse> CheckResponses(RpcMessage[] messages)
+        private IEnumerable<RpcResponse> CheckResponses(RpcMessage[] messages)
         {
             var exceptions = new List<Exception>();
             var responses = new List<RpcResponse>();
@@ -106,107 +92,22 @@ namespace Delugional.Rpc
             }
         }
 
-        public override async Task<string> AddMagnetAsync(string url, IDictionary<string, object> options = null)
-        {
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentException("Argument is null or whitespace", nameof(url));
-
-            return await CallAsync("core.add_torrent_magnet", url, options?.ToObjectDictionary()) as string;
-        }
-
-        public override async Task<string> AddTorrentAsync(string fileName, byte[] fileDump, IDictionary<string, object> options = null)
-        {
-            if (string.IsNullOrWhiteSpace(fileName))
-                throw new ArgumentException("Argument is null or whitespace", nameof(fileName));
-            if (fileDump == null)
-                throw new ArgumentNullException(nameof(fileDump));
-            if (fileDump.Length == 0)
-                throw new ArgumentException("Argument is empty collection", nameof(fileDump));
-
-            string fileContents = Base64.Encode(fileDump);
-
-            return await CallAsync("core.add_torrent_file", fileName, fileContents, options?.ToObjectDictionary()) as string;
-        }
-
-        public override async Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false)
-        {
-            Dictionary<object, object> filters = filter != null ? filter.ToDictionary().ToObjectDictionary() : new Dictionary<object, object>();
-
-            object result = await CallAsync("core.get_torrents_status", filters, statusKeys != null ? statusKeys.ToObjectArray() : new object[0], diff);
-            if (result == null)
-                return null;
-
-            var dict = new Dictionary<string, IDictionary<string, object>>();
-            var torrents = (Dictionary<object, object>)result;
-            foreach (var torrent in torrents)
-            {
-                var torrentId = (string)torrent.Key;
-                var statuses = (Dictionary<object, object>)torrent.Value;
-
-                dict[torrentId] = statuses.ToDictionary(s => (string)s.Key, s => s.Value);
-            }
-
-            return dict;
-        }
-
-        public override async Task<IDictionary<string, object>> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false)
-        {
-            if (string.IsNullOrWhiteSpace(torrentId))
-                throw new ArgumentException("Argument is null or whitespace", nameof(torrentId));
-
-            object result = await CallAsync("core.get_torrent_status", torrentId, statusKeys.ToObjectArray(), diff);
-
-            var statuses = (Dictionary<object, object>)result;
-            return statuses?.ToDictionary(s => (string)s.Key, s => s.Value);
-        }
-
-        public override async Task<bool> RemoveTorrentAsync(string torrentId, bool removeData = false)
-        {
-            if (string.IsNullOrWhiteSpace(torrentId))
-                throw new ArgumentException("Argument is null or whitespace", nameof(torrentId));
-
-            object result = await CallAsync("core.remove_torrent", torrentId, removeData);
-
-            return result is bool && (bool)result;
-        }
-
-        public override async Task<object> GetSessionStatusAsync(string[] keys)
-        {
-            return await CallAsync("core.get_session_status", (object)keys);
-        }
-
-        public override async Task<object[]> RemoveTorrentsAsync(string[] torrentIds, bool removeData = false)
-        {
-            if (torrentIds == null)
-                throw new ArgumentNullException(nameof(torrentIds));
-            if (torrentIds.Length == 0)
-                throw new ArgumentException("Argument is empty collection", nameof(torrentIds));
-
-            return await CallAsync("core.remove_torrents", torrentIds.ToObjectArray(), removeData) as object[];
-        }
-
-        public override async Task<string[]> GetMethodListAsync()
-        {
-            var result = await CallAsync("daemon.get_method_list");
-            return ((object[])result).Cast<string>().ToArray();
-        }
-
-        public virtual Task<object> CallAsync(string method, params object[] args)
+        protected Task<object> CallAsync(string method, params object[] args)
         {
             return CallAsync(method, null, args);
         }
 
-        public virtual Task<object> CallAsync(int id, string method, params object[] args)
+        protected Task<object> CallAsync(int id, string method, params object[] args)
         {
             return CallAsync(method, null, args);
         }
 
-        public virtual Task<object> CallAsync(string method, IDictionary<string, object> kwargs, params object[] args)
+        protected Task<object> CallAsync(string method, IDictionary<string, object> kwargs, params object[] args)
         {
             return CallAsync(IdGenerator.Default.Next(), method, kwargs, args);
         }
 
-        public virtual Task<object> CallAsync(int id, string method, IDictionary<string, object> kwargs, params object[] args)
+        protected Task<object> CallAsync(int id, string method, IDictionary<string, object> kwargs, params object[] args)
         {
             if (string.IsNullOrWhiteSpace(method))
                 throw new ArgumentException("Argument is null or whitespace", nameof(method));
@@ -215,7 +116,7 @@ namespace Delugional.Rpc
             return CallAsync(request);
         }
 
-        public virtual async Task<object> CallAsync(RpcRequest request)
+        protected async Task<object> CallAsync(RpcRequest request)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
@@ -224,12 +125,12 @@ namespace Delugional.Rpc
             return results.First();
         }
 
-        public virtual Task<object[]> CallAsync(params RpcRequest[] requests)
+        protected Task<object[]> CallAsync(params RpcRequest[] requests)
         {
             return CallAsync((IEnumerable<RpcRequest>)requests);
         }
 
-        public virtual async Task<object[]> CallAsync(IEnumerable<RpcRequest> requests)
+        protected async Task<object[]> CallAsync(IEnumerable<RpcRequest> requests)
         {
             if (requests == null)
                 throw new ArgumentNullException(nameof(requests));
@@ -241,8 +142,6 @@ namespace Delugional.Rpc
 
             if (requests.Any(request => request == null))
                 throw new ArgumentException("Argument contains null items", nameof(requests));
-
-            CheckDisposed();
 
             var tcss = new TaskCompletionSource<RpcMessage>[requestsArray.Length];
             try
@@ -275,7 +174,7 @@ namespace Delugional.Rpc
             }
         }
 
-        public virtual async Task<AuthLevels> LoginAsync(string username, string password)
+        public async Task<AuthLevels> LoginAsync(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username))
                 throw new ArgumentException("Argument is null or whitespace", nameof(username));
@@ -283,6 +182,11 @@ namespace Delugional.Rpc
                 throw new ArgumentException("Argument is null or whitespace", nameof(password));
 
             return (AuthLevels)await CallAsync("daemon.login", new Dictionary<string, object> { { "client_version", "2.2.0" } }, username, password);
+        }
+
+        public void Dispose()
+        {
+            Connection.Dispose();
         }
     }
 }
