@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,7 +11,7 @@ namespace Delugional.Rpc
     public abstract class DelugeRpc : IDisposable
     {
         private readonly Dictionary<int, TaskCompletionSource<RpcMessage>> tasks = new Dictionary<int, TaskCompletionSource<RpcMessage>>();
-
+        private ExceptionDispatchInfo exception;
         internal DelugeRpc(DelugeRpcConnection connection)
         {
             if (!connection.IsOpen)
@@ -88,7 +90,12 @@ namespace Delugional.Rpc
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                // Unknown errors fail all pending and subsequent calls of the RPC client.
+                exception = ExceptionDispatchInfo.Capture(ex);
+                foreach (var task in tasks.Values)
+                {
+                    task.SetException(ex);
+                }
             }
         }
 
@@ -132,6 +139,8 @@ namespace Delugional.Rpc
 
         protected async Task<object[]> CallAsync(IEnumerable<RpcRequest> requests)
         {
+            if (exception != null)
+                exception.Throw();
             if (requests == null)
                 throw new ArgumentNullException(nameof(requests));
 
@@ -153,17 +162,28 @@ namespace Delugional.Rpc
                 }
 
                 await Connection.Send(requests);
-#if DEBUG
-                // No timeout while debugging.
-                var cts = new CancellationTokenSource();
-#else
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-#endif
-                RpcMessage[] messages = await Task.WhenAll(tcss.Select(tcs => tcs.Task)).WaitAsync(cts.Token);
+                CancellationTokenSource cts;
+                if (Debugger.IsAttached)
+                {
+                    // No timeout while debugging.
+                    cts = new CancellationTokenSource();
+                }
+                else
+                {
+                    cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                }
+                try
+                {
+                    RpcMessage[] messages = await Task.WhenAll(tcss.Select(tcs => tcs.Task)).WaitAsync(cts.Token);
 
-                IEnumerable<RpcResponse> responses = CheckResponses(messages);
+                    IEnumerable<RpcResponse> responses = CheckResponses(messages);
 
-                return responses.Select(response => response.Data).ToArray();
+                    return responses.Select(response => response.Data).ToArray();
+                }
+                catch (OperationCanceledException)
+                {
+                    throw new TimeoutException("Deluge RPC call timed out.");
+                }
             }
             finally
             {
