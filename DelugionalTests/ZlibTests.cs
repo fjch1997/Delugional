@@ -22,8 +22,7 @@ namespace DelugionalTests
         {
             var list = "hello_world";
 
-            string encode = Rencode.Encode(list);
-            byte[] encodedBytes = encode.Select(Convert.ToByte).ToArray();
+            byte[] encodedBytes = Rencode.Encode(list);
 
             byte[] bytes = Zlib.Deflate(encodedBytes);
             string base64 = Base64.Encode(bytes);

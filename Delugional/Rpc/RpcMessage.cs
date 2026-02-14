@@ -68,7 +68,7 @@ namespace Delugional.Rpc
 
         public MessageType Type { get; }
 
-        public static RpcMessage Create(object[] result)
+        public static RpcMessage Create(DelugeVersion version, object[] result)
         {
             var responseType = (MessageType)result[0];
             switch (responseType)
@@ -78,7 +78,7 @@ namespace Delugional.Rpc
                 case MessageType.Event:
                     return CreateEventMessage(result);
                 case MessageType.Error:
-                    return CreateErrorMessage(result);
+                    return CreateErrorMessage(version, result);
             }
 
             throw new InvalidOperationException("Invalid response format: " + string.Join(",", result));
@@ -96,16 +96,30 @@ namespace Delugional.Rpc
             return new RpcEvent(eventName, result[2]);
         }
 
-        private static RpcError CreateErrorMessage(object[] result)
+        private static RpcError CreateErrorMessage(DelugeVersion version, object[] result)
         {
-            int id = (int) result[1];
+            switch (version)
+            {
+                case DelugeVersion.V1:
+                    int id = (int)result[1];
 
-            var errorDetails = (object[]) result[2];
-            var exceptionType = (string)errorDetails[0];
-            var exceptionMessage = (string)errorDetails[1];
-            var traceback = (string)errorDetails[2];
+                    var errorDetails = (object[])result[2];
+                    var exceptionType = (string)errorDetails[0];
+                    var exceptionMessage = (string)errorDetails[1];
+                    var traceback = (string)errorDetails[2];
 
-            return new RpcError(id, exceptionType, exceptionMessage, traceback);
+                    return new RpcError(id, exceptionType, exceptionMessage, traceback);
+                case DelugeVersion.V2:
+                case DelugeVersion.V2_1:
+                    id = (int)result[1];
+                    exceptionType = (string)result[2];
+                    exceptionMessage = (string)((object[])result[3])[0];
+                    traceback = (string)result[5];
+
+                    return new RpcError(id, exceptionType, exceptionMessage, traceback);
+                default:
+                    throw new Exception("Unsupported Deluge version: " + version);
+            }
         }
     }
 }

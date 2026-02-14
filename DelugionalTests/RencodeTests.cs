@@ -17,7 +17,7 @@ namespace DelugionalTests
                 new object[] {"foo", "bar"}
             };
 
-            string encode = Rencode.Encode(list);
+            Rencode.Encode(list);
         }
 
         [TestMethod]
@@ -30,7 +30,7 @@ namespace DelugionalTests
                 new object[] {"foo", "bar"}
             };
 
-            string encode = Rencode.Encode(list);
+            var encode = Rencode.Encode(list);
 
             object decode = Rencode.Decode(encode);
         }

@@ -1,14 +1,16 @@
+using Delugional.Utility;
+using rencodesharp;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Delugional.Utility;
-using Ionic.Zlib;
-using rencodesharp;
 
 namespace Delugional.Rpc
 {
@@ -16,11 +18,10 @@ namespace Delugional.Rpc
     {
         private const int BufferSize = 4096;
 
-        private readonly List<byte> readBuffer = new List<byte>();
-
         private readonly string host;
         private readonly int port;
 
+        private DelugeVersion version = DelugeVersion.None;
         private Stream stream;
         private TcpClient client;
 
@@ -30,7 +31,7 @@ namespace Delugional.Rpc
         }
 
         public DelugeRpcConnectionV3(IPAddress ipAddress, int port = 58846)
-            : this (ipAddress.ToString(), port)
+            : this(ipAddress.ToString(), port)
         {
         }
 
@@ -44,79 +45,176 @@ namespace Delugional.Rpc
 
         public Stream Stream => stream;
 
+        public string DaemonVersion { get; private set; }
+
         public override async Task OpenAsync()
         {
             CheckDisposed();
 
             var client = new TcpClient(host, port);
-            
+
             var sslStream = new SslStream(client.GetStream(), false, (sender, certificate, chain, errors) => true);
-            await sslStream.AuthenticateAsClientAsync(host);
+            await sslStream.AuthenticateAsClientAsync(host, null, System.Security.Authentication.SslProtocols.Tls12, false);
 
             stream = sslStream;
             this.client = client;
+
+            await Send(DelugeVersion.V1, new[] { new RpcRequest("daemon.info") });
+            await Send(DelugeVersion.V2, new[] { new RpcRequest("daemon.info") });
+            await Send(DelugeVersion.V2_1, new[] { new RpcRequest("daemon.info") });
+            await DetectVersion();
+        }
+
+        private async Task DetectVersion()
+        {
+            var buffer = new byte[BufferSize];
+
+            int read = await stream.ReadAsync(buffer, 0, BufferSize);
+            if (read == 0)
+                return;
+
+            RpcMessage[] messages;
+            if (buffer[0] == (byte)'D')
+            {
+                version = DelugeVersion.V2;
+                messages = ParseRencodeZlibBuffer(buffer, 5, read - 5);
+            }
+            else if (buffer[0] == 1)
+            {
+                version = DelugeVersion.V2_1;
+                messages = ParseRencodeZlibBuffer(buffer, 5, read - 5);
+            }
+            else
+            {
+                version = DelugeVersion.V1;
+                messages = ParseRencodeZlibBuffer(buffer, 0, read);
+            }
+
+            if (messages.Length == 0)
+                throw new Exception("Failed to detect protocol version. No messages received.");
+
+            var message = messages[0];
+            if (!(message is RpcResponse response))
+                throw new Exception("Failed to detect protocol version. Expected a response message.");
+            if (response.Data is not string versionString)
+                throw new Exception("Failed to detect protocol version. Expected a string in the response data.");
+            if (!new Regex("\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}").IsMatch(versionString))
+                throw new Exception("Failed to detect protocol version. Invalid version string format.");
+            DaemonVersion = versionString;
+        }
+
+        private async Task Send(DelugeVersion version, IEnumerable<RpcRequest> requests)
+        {
+            CheckDisposed();
+            var formatted = FormatRequestMessages(requests);
+            var encoded = Rencode.Encode(formatted);
+            using var memoryStream = new MemoryStream();
+            using (var zlib = new ZLibStream(memoryStream, CompressionMode.Compress, true))
+            {
+                zlib.Write(encoded, 0, encoded.Length);
+            }
+            var messageBytes = memoryStream.ToArray();
+            switch (version)
+            {
+                case DelugeVersion.None:
+                    throw new InvalidOperationException("Protocol version not detected. Cannot send messages.");
+                case DelugeVersion.V1:
+                    break;
+                case DelugeVersion.V2:
+                    {
+                        // The first byte is the letter D.
+                        // The next four bytes are the length of the message in big-endian 32-bit integer.
+                        var header = new byte[] { (byte)'D', 0, 0, 0, 0 };
+                        BinaryPrimitives.WriteInt32BigEndian(header.AsSpan().Slice(1), messageBytes.Length);
+                        Stream.Write(header, 0, header.Length);
+                        break;
+                    }
+                case DelugeVersion.V2_1:
+                    {
+                        // The first byte is the protocol number. The only supported number is 1.
+                        // The next four bytes are the length of the message in big-endian 32-bit unsigned integer.
+                        var header = new byte[] { 1, 0, 0, 0, 0 };
+                        BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan().Slice(1), (uint)messageBytes.Length);
+                        Stream.Write(header, 0, header.Length);
+                        break;
+                    }
+                default:
+                    throw new InvalidOperationException("Unsupported protocol version.");
+            }
+            await Stream.WriteAsync(messageBytes, 0, messageBytes.Length);
+        }
+
+        private RpcMessage[] ParseRencodeZlibBuffer(byte[] buffer, int offset, int length)
+        {
+            var inflated = Zlib.Inflate(buffer, offset, length);
+            var result = Rencode.Decode(inflated) as object[];
+            if (result == null)
+                return null;
+
+            var messages = new List<RpcMessage>();
+            switch (version)
+            {
+                case DelugeVersion.V1:
+                    const int partsPerMessage = 3;
+                    for (int skip = 0; skip < result.Length; skip += partsPerMessage)
+                    {
+                        object[] messageParts = result.Skip(skip).Take(partsPerMessage).ToArray();
+                        RpcMessage message = RpcMessage.Create(version, messageParts);
+                        messages.Add(message);
+                    }
+
+                    return messages.ToArray();
+                case DelugeVersion.V2:
+                case DelugeVersion.V2_1:
+                    return new[] { RpcMessage.Create(version, result) };
+                default:
+                    throw new Exception("Protocol version not detected. Cannot parse messages.");
+            }
         }
 
         public override Task Send(RpcRequest request)
         {
-            return Send(new[] {request});
+            return Send(new[] { request });
         }
 
         public override async Task Send(IEnumerable<RpcRequest> requests)
         {
-            CheckDisposed();
-
-            object formatted = FormatRequestMessages(requests);
-            string encoded = Rencode.Encode(formatted);
-            byte[] encodedBytes = encoded.Select(Convert.ToByte).ToArray();
-
-            using (var zlib = new ZlibStream(Stream, CompressionMode.Compress, true))
-            {
-                await zlib.WriteAsync(encodedBytes, 0, encodedBytes.Length);
-            }
+            await Send(version, requests);
         }
 
         public override async Task<RpcMessage[]> Receive()
         {
             CheckDisposed();
 
-            var buffer = new byte[BufferSize];
-
-            while (true)
+            switch (version)
             {
-                int read = await stream.ReadAsync(buffer, 0, BufferSize);
-                if (read == 0)
-                    return null;
-
-                IEnumerable<byte> bytesRead = buffer.Where((b, i) => i < read);
-                readBuffer.AddRange(bytesRead);
-
-                try
-                {
-                    byte[] inflated = Zlib.Inflate(readBuffer.ToArray());
-                    string encoded = string.Concat(inflated.Select(Convert.ToChar));
-                    var result = Rencode.Decode(encoded) as object[];
-                    if (result == null)
-                        return null;
-
-                    var messages = new List<RpcMessage>();
-
-                    const int partsPerMessage = 3;
-                    for (int skip = 0; skip < result.Length; skip+= partsPerMessage)
+                case DelugeVersion.V1:
                     {
-                        object[] messageParts = result.Skip(skip).Take(partsPerMessage).ToArray();
-                        RpcMessage message = RpcMessage.Create(messageParts);
-                        messages.Add(message);
+                        var buffer = new byte[BufferSize];
+                        int read = await stream.ReadAsync(buffer, 0, BufferSize);
+
+                        if (read == 0)
+                            return null;
+
+                        return ParseRencodeZlibBuffer(buffer, 0, read);
                     }
-
-                    readBuffer.Clear();
-
-                    return messages.ToArray();
-                }
-                catch
-                {
-                    // Message is incomplete
-                }
+                case DelugeVersion.V2:
+                case DelugeVersion.V2_1:
+                    {
+                        byte[] headerByteBuffer = new byte[1];
+                        await stream.ReadAsync(headerByteBuffer, 0, 1);
+                        var headerByte = headerByteBuffer[0];
+                        if (headerByte != 'D' && headerByte != 1)
+                            throw new Exception("Invalid message format. Expected D or protocol number as the first byte in the reply message.");
+                        var sizeBuffer = new byte[4];
+                        await stream.ReadExactlyAsync(sizeBuffer, 0, 4);
+                        int size = BinaryPrimitives.ReadInt32BigEndian(sizeBuffer);
+                        var buffer = new byte[size];
+                        await stream.ReadExactlyAsync(buffer, 0, size);
+                        return ParseRencodeZlibBuffer(buffer, 0, size);
+                    }
+                default:
+                    throw new InvalidOperationException("Protocol version not detected. Cannot receive messages.");
             }
         }
 

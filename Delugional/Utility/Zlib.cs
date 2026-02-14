@@ -1,6 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.IO.Compression;
 using System.Text;
-using Ionic.Zlib;
 
 namespace Delugional.Utility
 {
@@ -33,13 +34,15 @@ namespace Delugional.Utility
 
         public static byte[] Inflate(byte[] bytes, int offset, int length)
         {
-            using (var ms = new MemoryStream())
+            var buffer = new byte[4096];
+            using (var ms = new MemoryStream(bytes, offset, length))
             {
-                using (var inflateStream = new ZlibStream(ms, CompressionMode.Decompress))
+                using (var inflateStream = new ZLibStream(ms, CompressionMode.Decompress))
                 {
-                    inflateStream.Write(bytes, 0, length);
-
-                    return ms.ToArray();
+                    var read = inflateStream.Read(buffer, 0, buffer.Length);
+                    var outBuffer = new byte[read];
+                    Array.Copy(buffer, outBuffer, read);
+                    return outBuffer;
                 }
             }
         }
@@ -64,7 +67,7 @@ namespace Delugional.Utility
         {
             using (var ms = new MemoryStream())
             {
-                using (var deflateStream = new ZlibStream(ms, CompressionMode.Compress))
+                using (var deflateStream = new ZLibStream(ms, CompressionMode.Compress))
                 {
                     deflateStream.Write(bytes, offset, length);
 

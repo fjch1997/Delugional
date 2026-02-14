@@ -21,7 +21,7 @@ namespace Delugional.Rpc
 
     public class DelugeRpc : Deluge, IDelugeRpc
     {
-        private readonly WhenableDictionary<int, RpcMessage> receivedMessages = new WhenableDictionary<int, RpcMessage>();
+        private readonly Whenables.WhenableDictionary<int, RpcMessage> receivedMessages = new WhenableDictionary<int, RpcMessage>();
 
         public DelugeRpc(IDelugeRpcConnection connection)
         {
@@ -103,8 +103,7 @@ namespace Delugional.Rpc
 
         private Task<RpcMessage> CreateReceiveMessageTask(RpcRequest request)
         {
-            return receivedMessages.WhenAdded(id => id == request.Id)
-                .GetAsync()
+            return receivedMessages.WhenAddedAsync(id => id == request.Id)
                 .ContinueWith(t =>
                 {
                     KeyValuePair<int, RpcMessage> result = t.Result;
@@ -150,7 +149,7 @@ namespace Delugional.Rpc
                 var torrentId = (string)torrent.Key;
                 var statuses = (Dictionary<object, object>)torrent.Value;
 
-                dict[torrentId] = statuses.ToDictionary(s => (string) s.Key, s => s.Value);
+                dict[torrentId] = statuses.ToDictionary(s => (string)s.Key, s => s.Value);
             }
 
             return dict;
@@ -163,7 +162,7 @@ namespace Delugional.Rpc
 
             object result = await CallAsync("core.get_torrent_status", torrentId, statusKeys.ToObjectArray(), diff);
 
-            var statuses = (Dictionary<object, object>) result;
+            var statuses = (Dictionary<object, object>)result;
             return statuses?.ToDictionary(s => (string)s.Key, s => s.Value);
         }
 
@@ -216,13 +215,13 @@ namespace Delugional.Rpc
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            object[] results = await CallAsync(new[] {request});
+            object[] results = await CallAsync(new[] { request });
             return results.First();
         }
 
         public virtual Task<object[]> CallAsync(params RpcRequest[] requests)
         {
-            return CallAsync((IEnumerable<RpcRequest>) requests);
+            return CallAsync((IEnumerable<RpcRequest>)requests);
         }
 
         public virtual async Task<object[]> CallAsync(IEnumerable<RpcRequest> requests)
@@ -258,8 +257,8 @@ namespace Delugional.Rpc
                 throw new ArgumentException("Argument is null or whitespace", nameof(username));
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Argument is null or whitespace", nameof(password));
-            
-            return (AuthLevels)await CallAsync("daemon.login", username, password);
+
+            return (AuthLevels)await CallAsync("daemon.login", new Dictionary<string, object> { { "client_version", "2.2.0" } }, username, password);
         }
     }
 }
