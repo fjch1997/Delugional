@@ -34,17 +34,14 @@ namespace Delugional.Utility
 
         public static byte[] Inflate(byte[] bytes, int offset, int length)
         {
-            var buffer = new byte[4096];
-            using (var ms = new MemoryStream(bytes, offset, length))
+            using (var streamIn = new MemoryStream(bytes, offset, length))
+            using (var streamOut = new MemoryStream())
+            using (var inflateStream = new ZLibStream(streamIn, CompressionMode.Decompress))
             {
-                using (var inflateStream = new ZLibStream(ms, CompressionMode.Decompress))
-                {
-                    var read = inflateStream.Read(buffer, 0, buffer.Length);
-                    var outBuffer = new byte[read];
-                    Array.Copy(buffer, outBuffer, read);
-                    return outBuffer;
-                }
+                inflateStream.CopyTo(streamOut);
+                return streamOut.ToArray();
             }
+
         }
 
         public static byte[] DeflateString(string s)
