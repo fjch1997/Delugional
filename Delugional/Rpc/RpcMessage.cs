@@ -39,7 +39,7 @@ namespace Delugional.Rpc
 
     public class RpcEvent : RpcMessage
     {
-        public RpcEvent(string eventName, object data) 
+        public RpcEvent(string eventName, object data)
             : base(-1, MessageType.Response)
         {
             EventName = eventName;
@@ -92,7 +92,7 @@ namespace Delugional.Rpc
 
         private static RpcEvent CreateEventMessage(object[] result)
         {
-            string eventName = (string) result[1];
+            string eventName = (string)result[1];
             return new RpcEvent(eventName, result[2]);
         }
 
@@ -101,22 +101,25 @@ namespace Delugional.Rpc
             switch (version)
             {
                 case DelugeVersion.V1:
-                    int id = (int)result[1];
+                    {
+                        int id = (int)result[1];
+                        var errorDetails = (object[])result[2];
+                        var exceptionType = (string)errorDetails[0];
+                        var exceptionMessage = (string)errorDetails[1];
+                        var traceback = (string)errorDetails[2];
 
-                    var errorDetails = (object[])result[2];
-                    var exceptionType = (string)errorDetails[0];
-                    var exceptionMessage = (string)errorDetails[1];
-                    var traceback = (string)errorDetails[2];
-
-                    return new RpcError(id, exceptionType, exceptionMessage, traceback);
+                        return new RpcError(id, exceptionType, exceptionMessage, traceback);
+                    }
                 case DelugeVersion.V2:
                 case DelugeVersion.V2_1:
-                    id = (int)result[1];
-                    exceptionType = (string)result[2];
-                    exceptionMessage = (string)((object[])result[3])[0];
-                    traceback = (string)result[5];
+                    {
+                        var id = (int)result[1];
+                        var exceptionType = result[2] as string;
+                        var exceptionMessage = ((object[])result[3])[0] as string;
+                        var traceback = result[5] as string;
 
-                    return new RpcError(id, exceptionType, exceptionMessage, traceback);
+                        return new RpcError(id, exceptionType, exceptionMessage, traceback);
+                    }
                 default:
                     throw new Exception("Unsupported Deluge version: " + version);
             }
