@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Delugional;
 using Delugional.Daemon;
@@ -12,6 +13,7 @@ namespace DelugionalTests
     public class DelugeRpcTests
     {
         private IDelugeDaemon daemon;
+        private User user = AuthFile.OpenDefault().First();
 
         [TestInitialize]
         public void Initialize()
@@ -32,7 +34,7 @@ namespace DelugionalTests
         {
             using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
             {
-                await deluge.LoginAsync(Resources.Username, Resources.Password);
+                await deluge.LoginAsync(user.Username, user.Password);
 
                 string torrentId = await deluge.AddTorrentAsync("torrent_file", await File.ReadAllBytesAsync("ubuntu-24.04.4-desktop-amd64.iso.torrent"));
 
@@ -47,7 +49,7 @@ namespace DelugionalTests
         {
             using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
             {
-                await deluge.LoginAsync(Resources.Username, Resources.Password);
+                await deluge.LoginAsync(user.Username, user.Password);
 
                 string torrentId = await deluge.AddMagnetAsync(Resources.MagnetLink1);
 
@@ -62,7 +64,7 @@ namespace DelugionalTests
         {
             using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
             {
-                await deluge.LoginAsync(Resources.Username, Resources.Password);
+                await deluge.LoginAsync(user.Username, user.Password);
 
                 string torrentId = await deluge.AddMagnetAsync(Resources.MagnetLink1);
 

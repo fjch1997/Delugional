@@ -19,7 +19,7 @@ namespace DelugionalTests {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -66,24 +66,6 @@ namespace DelugionalTests {
         internal static string MagnetLink1 {
             get {
                 return ResourceManager.GetString("MagnetLink1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 1b46702989fe6d71cb3980a861f24503933686b9.
-        /// </summary>
-        internal static string Password {
-            get {
-                return ResourceManager.GetString("Password", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to delugionaltests.
-        /// </summary>
-        internal static string Username {
-            get {
-                return ResourceManager.GetString("Username", resourceCulture);
             }
         }
     }
