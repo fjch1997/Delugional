@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Delugional.Utility;
-using Whenables;
 
 namespace Delugional.Rpc
 {
@@ -21,7 +21,7 @@ namespace Delugional.Rpc
 
     public class DelugeRpc : Deluge, IDelugeRpc
     {
-        private readonly Whenables.WhenableDictionary<int, RpcMessage> receivedMessages = new WhenableDictionary<int, RpcMessage>();
+        private readonly Dictionary<int, TaskCompletionSource<RpcMessage>> tasks = new Dictionary<int, TaskCompletionSource<RpcMessage>>();
 
         public DelugeRpc(IDelugeRpcConnection connection)
         {
@@ -68,7 +68,9 @@ namespace Delugional.Rpc
                 }
             }
 
-            if (exceptions.Any())
+            if (exceptions.Count == 1)
+                throw exceptions[0];
+            if (exceptions.Count > 1)
                 throw new AggregateException(exceptions);
 
             return responses;
@@ -86,7 +88,10 @@ namespace Delugional.Rpc
                     {
                         if (message.Type == MessageType.Response || message.Type == MessageType.Error)
                         {
-                            receivedMessages.Add(message.Id, message);
+                            if (tasks.TryGetValue(message.Id, out var task))
+                            {
+                                task.SetResult(message);
+                            }
                         }
                         else if (message.Type == MessageType.Event)
                         {
@@ -99,17 +104,6 @@ namespace Delugional.Rpc
             {
                 Console.WriteLine(ex);
             }
-        }
-
-        private Task<RpcMessage> CreateReceiveMessageTask(RpcRequest request)
-        {
-            return receivedMessages.WhenAddedAsync(id => id == request.Id)
-                .ContinueWith(t =>
-                {
-                    KeyValuePair<int, RpcMessage> result = t.Result;
-                    receivedMessages.Remove(result.Key);
-                    return result.Value;
-                });
         }
 
         public override async Task<string> AddMagnetAsync(string url, IDictionary<string, object> options = null)
@@ -229,7 +223,7 @@ namespace Delugional.Rpc
             if (requests == null)
                 throw new ArgumentNullException(nameof(requests));
 
-            requests = requests.ToArray();
+            var requestsArray = requests.ToArray();
 
             if (!requests.Any())
                 throw new ArgumentException("Argument is empty collection", nameof(requests));
@@ -239,16 +233,30 @@ namespace Delugional.Rpc
 
             CheckDisposed();
 
-            await Connection.Send(requests);
+            var tcss = new TaskCompletionSource<RpcMessage>[requestsArray.Length];
+            try
+            {
+                for (int i = 0; i < requestsArray.Length; i++)
+                {
+                    tcss[i] = new TaskCompletionSource<RpcMessage>();
+                    tasks[requestsArray[i].Id] = tcss[i];
+                }
 
-            IEnumerable<Task<RpcMessage>> getTasks =
-                requests.Select(CreateReceiveMessageTask);
+                await Connection.Send(requests);
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                RpcMessage[] messages = await Task.WhenAll(tcss.Select(tcs => tcs.Task)).WaitAsync(cts.Token);
 
-            RpcMessage[] messages = await Task.WhenAll(getTasks);
+                IEnumerable<RpcResponse> responses = CheckResponses(messages);
 
-            IEnumerable<RpcResponse> responses = CheckResponses(messages);
-
-            return responses.Select(response => response.Data).ToArray();
+                return responses.Select(response => response.Data).ToArray();
+            }
+            finally
+            {
+                foreach (RpcRequest request in requestsArray)
+                {
+                    tasks.Remove(request.Id);
+                }
+            }
         }
 
         public virtual async Task<AuthLevels> LoginAsync(string username, string password)

@@ -1,6 +1,0 @@
-[submodule "Libraries/rencode-sharp"]
-	path = Libraries/rencode-sharp
-	url = https://github.com/fuzeman/rencode-sharp.git
-[submodule "Libraries/Whenables"]
-	path = Libraries/Whenables
-	url = https://github.com/snargledorf/Whenables.git
