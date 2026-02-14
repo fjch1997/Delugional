@@ -180,6 +180,12 @@ namespace Delugional.Rpc
             return await CallAsync("core.remove_torrents", torrentIds.ToObjectArray(), removeData) as object[];
         }
 
+        public override async Task<string[]> GetMethodListAsync()
+        {
+            var result = await CallAsync("daemon.get_method_list");
+            return ((object[])result).Cast<string>().ToArray();
+        }
+
         public virtual Task<object> CallAsync(string method, params object[] args)
         {
             return CallAsync(method, null, args);

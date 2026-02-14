@@ -106,5 +106,18 @@ namespace DelugionalTests
                 }
             }
         }
+
+        [TestMethod]
+        public async Task GetMethodList()
+        {
+            using (IDelugeRpc deluge = await daemon.OpenRpcAsync())
+            {
+                await deluge.LoginAsync(user.Username, user.Password);
+                string[] methodList = await deluge.GetMethodListAsync();
+                Assert.IsNotNull(methodList, "methodList != null");
+                Assert.IsTrue(methodList.Length > 0, "methodList.Length > 0");
+            }
+            }
+        }
     }
 }
