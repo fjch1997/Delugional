@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Delugional;
 using Delugional.Daemon;
@@ -33,7 +34,7 @@ namespace DelugionalTests
             {
                 await deluge.LoginAsync(Resources.Username, Resources.Password);
 
-                string torrentId = await deluge.AddTorrentAsync("torrent_file", new byte[] {1, 2, 3, 4});
+                string torrentId = await deluge.AddTorrentAsync("torrent_file", await File.ReadAllBytesAsync("ubuntu-24.04.4-desktop-amd64.iso.torrent"));
 
                 await deluge.RemoveTorrentAsync(torrentId);
 
