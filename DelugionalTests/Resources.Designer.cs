@@ -68,5 +68,14 @@ namespace DelugionalTests {
                 return ResourceManager.GetString("MagnetLink1", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to magnet:?xt=urn:btih:F73430DBFAF0031F9C5FDDCF0ADC340456DB4C91&amp;dn=ubuntu+15+10+desktop+64+bit&amp;tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce.
+        /// </summary>
+        internal static string MagnetLink2 {
+            get {
+                return ResourceManager.GetString("MagnetLink2", resourceCulture);
+            }
+        }
     }
 }

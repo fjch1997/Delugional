@@ -56,6 +56,11 @@ namespace Delugional
             return dict;
         }
 
+        public async Task<object> GetSessionStatusAsync(string[] keys)
+        {
+            return await CallAsync("core.get_session_status", (object)keys);
+        }
+
         public async Task<IDictionary<string, object>> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false)
         {
             if (string.IsNullOrWhiteSpace(torrentId))
@@ -65,6 +70,16 @@ namespace Delugional
 
             var statuses = (Dictionary<object, object>)result;
             return statuses?.ToDictionary(s => (string)s.Key, s => s.Value);
+        }
+
+        public Task PauseSessionAsync()
+        {
+            return CallAsync("core.pause_session");
+        }
+
+        public Task PauseTorrentAsync(string[] keys)
+        {
+            return CallAsync("core.pause_torrent", (object)keys);
         }
 
         public async Task<bool> RemoveTorrentAsync(string torrentId, bool removeData = false)
@@ -77,11 +92,6 @@ namespace Delugional
             return result is bool && (bool)result;
         }
 
-        public async Task<object> GetSessionStatusAsync(string[] keys)
-        {
-            return await CallAsync("core.get_session_status", (object)keys);
-        }
-
         public async Task<object[]> RemoveTorrentsAsync(string[] torrentIds, bool removeData = false)
         {
             if (torrentIds == null)
@@ -90,6 +100,15 @@ namespace Delugional
                 throw new ArgumentException("Argument is empty collection", nameof(torrentIds));
 
             return await CallAsync("core.remove_torrents", torrentIds.ToObjectArray(), removeData) as object[];
+        }
+
+        public Task ResumeSessionAsync()
+        {
+            return CallAsync("core.resume_session");
+        }
+        public Task ResumeTorrentAsync(string[] keys)
+        {
+            return CallAsync("core.resume_torrent", (object)keys);
         }
 
         public async Task<string[]> GetMethodListAsync()
