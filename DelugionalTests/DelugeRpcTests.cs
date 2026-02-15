@@ -71,7 +71,6 @@ namespace DelugionalTests
             return await AddMagnetAsync(Resources.MagnetLink1);
         }
 
-
         private async Task<string> AddMagnetAsync(string link)
         {
             var existingTorrents = await deluge.GetTorrentsStatusAsync(new Filter { Keywords = { ParseHashFromMagnetLink(link) } });
@@ -87,11 +86,16 @@ namespace DelugionalTests
         {
             for (int i = 0; i < attempts; i++)
             {
-                var status = await deluge.GetTorrentStatusAsync(torrentId, [BuiltInStatuses.Paused]);
-                if (status != null && status.TryGetValue(BuiltInStatuses.Paused, out var pausedValue))
+                var status = await deluge.GetTorrentStatusAsync(torrentId, [BuiltInStatuses.State]);
+                if (status != null && status.TryGetValue(BuiltInStatuses.State, out var state))
                 {
-                    if (pausedValue is bool paused && paused == expectedPaused)
-                        return true;
+                    if (state is string stateString)
+                    {
+                        if (expectedPaused && stateString == "Paused")
+                            return true;
+                        if (!expectedPaused && stateString != "Paused")
+                            return true;
+                    }
                 }
 
                 await Task.Delay(delayMilliseconds);
@@ -109,7 +113,6 @@ namespace DelugionalTests
             Assert.IsTrue(await WaitForPausedStateAsync(torrentId, true), "Torrent should be paused.");
             await deluge.ResumeSessionAsync();
             Assert.IsTrue(await WaitForPausedStateAsync(torrentId, false), "Torrent should be resumed.");
-
         }
 
         [TestMethod]
