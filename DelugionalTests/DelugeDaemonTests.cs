@@ -17,21 +17,22 @@ namespace DelugionalTests
         [TestMethod]
         public void StartStopRunning()
         {
-            bool running = DelugeDaemon.Default.Running;
+            var daemon = DelugeDaemon.Default;
 
-            Assert.IsFalse(running);
+            if (daemon.Running)
+            {
+                daemon.Stop();
+            }
 
-            DelugeDaemon.Default.Start();
+            Assert.IsFalse(daemon.Running);
 
-            running = DelugeDaemon.Default.Running;
+            daemon.Start();
 
-            Assert.IsTrue(running);
+            Assert.IsTrue(daemon.Running);
 
             DelugeDaemon.Default.Stop();
 
-            running = DelugeDaemon.Default.Running;
-
-            Assert.IsFalse(running);
+            Assert.IsFalse(daemon.Running);
         }
     }
 }
