@@ -1,6 +1,7 @@
 ﻿using Delugional;
 using Delugional.Daemon;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -87,16 +88,11 @@ namespace DelugionalTests
             for (int i = 0; i < attempts; i++)
             {
                 var status = await deluge.GetTorrentStatusAsync(torrentId, [BuiltInStatuses.State]);
-                if (status != null && status.TryGetValue(BuiltInStatuses.State, out var state))
-                {
-                    if (state is string stateString)
-                    {
-                        if (expectedPaused && stateString == "Paused")
-                            return true;
-                        if (!expectedPaused && stateString != "Paused")
-                            return true;
-                    }
-                }
+                if (expectedPaused && status.State == TorrentState.Paused)
+                    return true;
+                if (!expectedPaused && status.State != TorrentState.Paused)
+                    return true;
+
 
                 await Task.Delay(delayMilliseconds);
             }
@@ -137,26 +133,22 @@ namespace DelugionalTests
         public async Task GetTorrentStatus()
         {
             var torrentId = await AddMagnetAsync();
-            IDictionary<string, object> status = await deluge.GetTorrentStatusAsync(torrentId, BuiltInStatuses.AllStatuses);
+            var status = await deluge.GetTorrentStatusAsync(torrentId, []);
 
             Assert.IsNotNull(status, "status != null");
-            // Don't check the expected count of status keys since it can vary based Deluge version.
-            Assert.IsTrue(status.ContainsKey(BuiltInStatuses.Name), "status.ContainsKey(BuiltInStatuses.Name)");
-            Assert.IsTrue(status.ContainsKey(BuiltInStatuses.ActiveTime), "status.ContainsKey(BuiltInStatuses.ActiveTime)");
+            Assert.AreEqual("ubuntu 15 10 desktop 64 bit", status.Name);
         }
 
         [TestMethod]
         public async Task GetTorrentsStatus()
         {
             var torrentId = await AddMagnetAsync();
-            IDictionary<string, IDictionary<string, object>> statuses = await deluge.GetTorrentsStatusAsync(new Filter { Ids = new HashSet<string> { torrentId } }, [BuiltInStatuses.Name, BuiltInStatuses.ActiveTime]);
+            var statuses = await deluge.GetTorrentsStatusAsync(new Filter { Ids = new HashSet<string> { torrentId } }, [BuiltInStatuses.Name]);
             Assert.IsNotNull(statuses, "statuses != null");
             Assert.AreEqual(1, statuses.Count, "statuses.Count == 1");
             Assert.IsTrue(statuses.ContainsKey(torrentId), $"statuses.ContainsKey({torrentId})");
             Assert.IsNotNull(statuses[torrentId], $"statuses[{torrentId}] != null");
-            Assert.AreEqual(2, statuses[torrentId].Count, $"statuses[{torrentId}].Count == 2");
-            Assert.IsTrue(statuses[torrentId].ContainsKey(BuiltInStatuses.Name), $"statuses[{torrentId}].ContainsKey({BuiltInStatuses.Name})");
-            Assert.IsTrue(statuses[torrentId].ContainsKey(BuiltInStatuses.ActiveTime), $"statuses[{torrentId}].ContainsKey({BuiltInStatuses.ActiveTime})");
+            Assert.AreEqual("ubuntu 15 10 desktop 64 bit", statuses[torrentId].Name);
         }
 
         [TestMethod]

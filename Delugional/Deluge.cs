@@ -35,7 +35,7 @@ namespace Delugional
             return await CallAsync("core.add_torrent_file", fileName, fileContents, options?.ToObjectDictionary()) as string;
         }
 
-        public async Task<IDictionary<string, IDictionary<string, object>>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false)
+        public async Task<IDictionary<string, TorrentStatus>> GetTorrentsStatusAsync(Filter filter = null, string[] statusKeys = null, bool diff = false)
         {
             Dictionary<object, object> filters = filter != null ? filter.ToDictionary().ToObjectDictionary() : new Dictionary<object, object>();
 
@@ -43,14 +43,12 @@ namespace Delugional
             if (result == null)
                 return null;
 
-            var dict = new Dictionary<string, IDictionary<string, object>>();
+            var dict = new Dictionary<string, TorrentStatus>();
             var torrents = (Dictionary<object, object>)result;
             foreach (var torrent in torrents)
             {
                 var torrentId = (string)torrent.Key;
-                var statuses = (Dictionary<object, object>)torrent.Value;
-
-                dict[torrentId] = statuses.ToDictionary(s => (string)s.Key, s => s.Value);
+                dict[torrentId] = new TorrentStatus(torrent.Value);
             }
 
             return dict;
@@ -61,15 +59,14 @@ namespace Delugional
             return await CallAsync("core.get_session_status", (object)keys);
         }
 
-        public async Task<IDictionary<string, object>> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false)
+        public async Task<TorrentStatus> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false)
         {
             if (string.IsNullOrWhiteSpace(torrentId))
                 throw new ArgumentException("Argument is null or whitespace", nameof(torrentId));
 
-            object result = await CallAsync("core.get_torrent_status", torrentId, statusKeys.ToObjectArray(), diff);
+            var result = await CallAsync("core.get_torrent_status", torrentId, statusKeys?.ToObjectArray(), diff);
 
-            var statuses = (Dictionary<object, object>)result;
-            return statuses?.ToDictionary(s => (string)s.Key, s => s.Value);
+            return new TorrentStatus(result);
         }
 
         public Task PauseSessionAsync()
