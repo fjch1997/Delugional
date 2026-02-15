@@ -2,9 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Runtime.Versioning;
 
 namespace Delugional.Utility
 {
+    [SupportedOSPlatform("windows")]
     public static class ProcessHelper
     {
         public static bool IsExecutableRunning(string path)
@@ -25,16 +27,12 @@ namespace Delugional.Utility
             public static Process GetProcessForPath(string path)
             {
                 const string wmiQueryString = "SELECT ProcessId, ExecutablePath, CommandLine FROM Win32_Process";
-                using (var searcher = new ManagementObjectSearcher(wmiQueryString))
-                {
-                    using (ManagementObjectCollection results = searcher.Get())
-                    {
-                        return results.Cast<ManagementObject>()
-                            .Where(mo => string.Equals(mo["ExecutablePath"], path))
-                            .Join(Process.GetProcesses(), mo => (int)(uint)mo["ProcessId"], p => p.Id, (mo, p) => p)
-                            .FirstOrDefault();
-                    }
-                }
+                using var searcher = new ManagementObjectSearcher(wmiQueryString);
+                using var results = searcher.Get();
+                return results.Cast<ManagementObject>()
+                    .Where(mo => string.Equals(mo["ExecutablePath"], path))
+                    .Join(Process.GetProcesses(), mo => (int)(uint)mo["ProcessId"], p => p.Id, (mo, p) => p)
+                    .FirstOrDefault();
             }
         }
     }
