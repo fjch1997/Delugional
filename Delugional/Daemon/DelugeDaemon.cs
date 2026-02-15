@@ -58,11 +58,6 @@ namespace Delugional.Daemon
             Process.WaitForExit();
         }
 
-        public Deluge OpenRpc()
-        {
-            return OpenRpcAsync().Result;
-        }
-
         public async Task<Deluge> OpenRpcAsync()
         {
             var connection = new DelugeRpcConnection();
