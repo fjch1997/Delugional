@@ -86,7 +86,7 @@ namespace DelugionalTests
         {
             for (int i = 0; i < attempts; i++)
             {
-                var status = await deluge.GetTorrentStatusAsync(torrentId, [BuiltInStatuses.State]);
+                var status = await deluge.GetTorrentStatusAsync(torrentId, [nameof(TorrentStatus.State)]);
                 if (expectedPaused && status.State == TorrentState.Paused)
                     return true;
                 if (!expectedPaused && status.State != TorrentState.Paused)
@@ -142,7 +142,7 @@ namespace DelugionalTests
         public async Task GetTorrentsStatus()
         {
             var torrentId = await AddMagnetAsync();
-            var statuses = await deluge.GetTorrentsStatusAsync(new Filter { Ids = new HashSet<string> { torrentId } }, [BuiltInStatuses.Name]);
+            var statuses = await deluge.GetTorrentsStatusAsync(new Filter { Ids = new HashSet<string> { torrentId } }, [nameof(TorrentStatus.Name)]);
             Assert.IsNotNull(statuses, "statuses != null");
             Assert.AreEqual(1, statuses.Count, "statuses.Count == 1");
             Assert.IsTrue(statuses.ContainsKey(torrentId), $"statuses.ContainsKey({torrentId})");
@@ -163,11 +163,11 @@ namespace DelugionalTests
         {
             await AddMagnetAsync();
             var sessionStatus = await deluge.GetSessionStatusAsync([]);
-            
+
             // When passing empty array, Deluge returns all statistics
             Assert.IsNotNull(sessionStatus, "sessionStatus != null");
             Assert.IsTrue(sessionStatus.Raw.Count > 0, "Should contain session statistics");
-            
+
             // Verify we can access specific statistics
             Assert.IsTrue(sessionStatus.Ses.NumDownloadingTorrents >= 0);
             Assert.IsTrue(sessionStatus.Peer.NumPeersConnected >= 0);

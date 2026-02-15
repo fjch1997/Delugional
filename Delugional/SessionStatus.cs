@@ -17,6 +17,179 @@ namespace Delugional
             value = ((Dictionary<object, object>)rencodeResult).ToDictionary(i => i.Key.ToString(), i => i.Value);
         }
 
+        internal static Dictionary<string, string> PropertyNameMappings { get; } = new Dictionary<string, string>
+        {
+            // Peer Statistics - Error counters
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ErrorPeers)}", "peer.error_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.DisconnectedPeers)}", "peer.disconnected_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.EofPeers)}", "peer.eof_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ConnResetPeers)}", "peer.connreset_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ConnRefusedPeers)}", "peer.connrefused_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ConnAbortedPeers)}", "peer.connaborted_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NotConnectedPeers)}", "peer.notconnected_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.PermPeers)}", "peer.perm_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.BufferPeers)}", "peer.buffer_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.UnreachablePeers)}", "peer.unreachable_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.BrokenPipePeers)}", "peer.broken_pipe_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.AddrInUsePeers)}", "peer.addrinuse_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NoAccessPeers)}", "peer.no_access_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.InvalidArgPeers)}", "peer.invalid_arg_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.AbortedPeers)}", "peer.aborted_peers" },
+            
+            // Peer Statistics - Request counters
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.PieceRequests)}", "peer.piece_requests" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.MaxPieceRequests)}", "peer.max_piece_requests" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.InvalidPieceRequests)}", "peer.invalid_piece_requests" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ChokedPieceRequests)}", "peer.choked_piece_requests" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.CancelledPieceRequests)}", "peer.cancelled_piece_requests" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.PieceRejects)}", "peer.piece_rejects" },
+            
+            // Peer Statistics - Error type counters
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ErrorIncomingPeers)}", "peer.error_incoming_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ErrorOutgoingPeers)}", "peer.error_outgoing_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ErrorRc4Peers)}", "peer.error_rc4_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ErrorEncryptedPeers)}", "peer.error_encrypted_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ErrorTcpPeers)}", "peer.error_tcp_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ErrorUtpPeers)}", "peer.error_utp_peers" },
+            
+            // Peer Statistics - Connection counters
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ConnectTimeouts)}", "peer.connect_timeouts" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.UninterestingPeers)}", "peer.uninteresting_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.TimeoutPeers)}", "peer.timeout_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NoMemoryPeers)}", "peer.no_memory_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.TooManyPeers)}", "peer.too_many_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.TransportTimeoutPeers)}", "peer.transport_timeout_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumBannedPeers)}", "peer.num_banned_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.BannedForHashFailure)}", "peer.banned_for_hash_failure" },
+            
+            // Peer Statistics - Connection attempts
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ConnectionAttempts)}", "peer.connection_attempts" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.ConnectionAttemptLoops)}", "peer.connection_attempt_loops" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.BoostConnectionAttempts)}", "peer.boost_connection_attempts" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.MissedConnectionAttempts)}", "peer.missed_connection_attempts" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NoPeerConnectionAttempts)}", "peer.no_peer_connection_attempts" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.IncomingConnections)}", "peer.incoming_connections" },
+            
+            // Peer Statistics - Peer type counters
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumTcpPeers)}", "peer.num_tcp_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumSocks5Peers)}", "peer.num_socks5_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumHttpProxyPeers)}", "peer.num_http_proxy_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumUtpPeers)}", "peer.num_utp_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumI2pPeers)}", "peer.num_i2p_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumSslPeers)}", "peer.num_ssl_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumSslSocks5Peers)}", "peer.num_ssl_socks5_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumSslHttpProxyPeers)}", "peer.num_ssl_http_proxy_peers" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumSslUtpPeers)}", "peer.num_ssl_utp_peers" },
+            
+            // Peer Statistics - Peer state counters
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersHalfOpen)}", "peer.num_peers_half_open" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersConnected)}", "peer.num_peers_connected" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersUpInterested)}", "peer.num_peers_up_interested" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersDownInterested)}", "peer.num_peers_down_interested" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersUpUnchokedAll)}", "peer.num_peers_up_unchoked_all" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersUpUnchokedOptimistic)}", "peer.num_peers_up_unchoked_optimistic" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersUpUnchoked)}", "peer.num_peers_up_unchoked" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersDownUnchoked)}", "peer.num_peers_down_unchoked" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersUpRequests)}", "peer.num_peers_up_requests" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersDownRequests)}", "peer.num_peers_down_requests" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersEndGame)}", "peer.num_peers_end_game" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersUpDisk)}", "peer.num_peers_up_disk" },
+            { $"{nameof(Peer)}.{nameof(PeerStatistics.NumPeersDownDisk)}", "peer.num_peers_down_disk" },
+            
+            // Network Statistics - Event counters
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnReadCounter)}", "net.on_read_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnWriteCounter)}", "net.on_write_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnTickCounter)}", "net.on_tick_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnLsdCounter)}", "net.on_lsd_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnLsdPeerCounter)}", "net.on_lsd_peer_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnUdpCounter)}", "net.on_udp_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnAcceptCounter)}", "net.on_accept_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnDiskQueueCounter)}", "net.on_disk_queue_counter" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.OnDiskCounter)}", "net.on_disk_counter" },
+            
+            // Network Statistics - Sent bytes
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.SentPayloadBytes)}", "net.sent_payload_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.SentBytes)}", "net.sent_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.SentIpOverheadBytes)}", "net.sent_ip_overhead_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.SentTrackerBytes)}", "net.sent_tracker_bytes" },
+            
+            // Network Statistics - Received bytes
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.RecvPayloadBytes)}", "net.recv_payload_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.RecvBytes)}", "net.recv_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.RecvIpOverheadBytes)}", "net.recv_ip_overhead_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.RecvTrackerBytes)}", "net.recv_tracker_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.RecvFailedBytes)}", "net.recv_failed_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.RecvRedundantBytes)}", "net.recv_redundant_bytes" },
+            
+            // Network Statistics - Limiter stats
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.LimiterUpQueue)}", "net.limiter_up_queue" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.LimiterDownQueue)}", "net.limiter_down_queue" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.LimiterUpBytes)}", "net.limiter_up_bytes" },
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.LimiterDownBytes)}", "net.limiter_down_bytes" },
+            
+            // Network Statistics - Connection status
+            { $"{nameof(Net)}.{nameof(NetworkStatistics.HasIncomingConnections)}", "net.has_incoming_connections" },
+            
+            // Session Statistics - Torrent state counters
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumCheckingTorrents)}", "ses.num_checking_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumStoppedTorrents)}", "ses.num_stopped_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumUploadOnlyTorrents)}", "ses.num_upload_only_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumDownloadingTorrents)}", "ses.num_downloading_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumSeedingTorrents)}", "ses.num_seeding_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumQueuedSeedingTorrents)}", "ses.num_queued_seeding_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumQueuedDownloadTorrents)}", "ses.num_queued_download_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumErrorTorrents)}", "ses.num_error_torrents" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NonFilterTorrents)}", "ses.non_filter_torrents" },
+            
+            // Session Statistics - Piece statistics
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumPiecePassed)}", "ses.num_piece_passed" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumPieceFailed)}", "ses.num_piece_failed" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumHavePieces)}", "ses.num_have_pieces" },
+            { $"{nameof(Ses)}.{nameof(SessionStatistics.NumTotalPiecesAdded)}", "ses.num_total_pieces_added" },
+            
+            // Disk Statistics
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.DiskBlocksInUse)}", "disk.disk_blocks_in_use" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.BlocksWritten)}", "disk.blocks_written" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.BlocksRead)}", "disk.blocks_read" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.BlocksReadHit)}", "disk.blocks_read_hit" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.WritesCached)}", "disk.writes_cached" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.ReadsCached)}", "disk.reads_cached" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.QueuedWriteBytes)}", "disk.queued_write_bytes" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.QueuedJobs)}", "disk.queued_jobs" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.PeakQueuedJobs)}", "disk.peak_queued_jobs" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.PendingReadingJobs)}", "disk.pending_reading_jobs" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.RunningThreads)}", "disk.running_threads" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.FencedReadJobs)}", "disk.fenced_read_jobs" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.FencedWriteJobs)}", "disk.fenced_write_jobs" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.BlockedJobs)}", "disk.blocked_jobs" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.NumWritingThreads)}", "disk.num_writing_threads" },
+            { $"{nameof(Disk)}.{nameof(DiskStatistics.NumRunningThreads)}", "disk.num_running_threads" },
+            
+            // DHT Statistics
+            { $"{nameof(Dht)}.{nameof(DhtStatistics.DhtNodes)}", "dht.dht_nodes" },
+            { $"{nameof(Dht)}.{nameof(DhtStatistics.DhtNodeCache)}", "dht.dht_node_cache" },
+            { $"{nameof(Dht)}.{nameof(DhtStatistics.DhtTorrents)}", "dht.dht_torrents" },
+            { $"{nameof(Dht)}.{nameof(DhtStatistics.DhtGlobalNodes)}", "dht.dht_global_nodes" },
+            { $"{nameof(Dht)}.{nameof(DhtStatistics.DhtTotalAllocations)}", "dht.dht_total_allocations" },
+            
+            // Tracker Statistics
+            { $"{nameof(Tracker)}.{nameof(TrackerStatistics.TrackerRequestTimeouts)}", "ses.num_incoming_tracker" },
+            
+            // UTP Statistics
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpPacketLoss)}", "utp.utp_packet_loss" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpTimeout)}", "utp.utp_timeout" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpPacketsIn)}", "utp.utp_packets_in" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpPacketsOut)}", "utp.utp_packets_out" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpFastRetransmit)}", "utp.utp_fast_retransmit" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpPacketResend)}", "utp.utp_packet_resend" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpSamplesAboveTarget)}", "utp.utp_samples_above_target" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpSamplesBelowTarget)}", "utp.utp_samples_below_target" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpPayloadPktsIn)}", "utp.utp_payload_pkts_in" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpPayloadPktsOut)}", "utp.utp_payload_pkts_out" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpInvalidPktsIn)}", "utp.utp_invalid_pkts_in" },
+            { $"{nameof(Utp)}.{nameof(UtpStatistics.UtpRedundantPktsIn)}", "utp.utp_redundant_pkts_in" }
+        };
+
         public PeerStatistics Peer => new PeerStatistics(value);
 
         public NetworkStatistics Net => new NetworkStatistics(value);
@@ -52,81 +225,81 @@ namespace Delugional
         private int GetInt(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt32(v) : 0;
 
         // Error counters
-        public int ErrorPeers => GetInt("peer.error_peers");
-        public int DisconnectedPeers => GetInt("peer.disconnected_peers");
-        public int EofPeers => GetInt("peer.eof_peers");
-        public int ConnResetPeers => GetInt("peer.connreset_peers");
-        public int ConnRefusedPeers => GetInt("peer.connrefused_peers");
-        public int ConnAbortedPeers => GetInt("peer.connaborted_peers");
-        public int NotConnectedPeers => GetInt("peer.notconnected_peers");
-        public int PermPeers => GetInt("peer.perm_peers");
-        public int BufferPeers => GetInt("peer.buffer_peers");
-        public int UnreachablePeers => GetInt("peer.unreachable_peers");
-        public int BrokenPipePeers => GetInt("peer.broken_pipe_peers");
-        public int AddrInUsePeers => GetInt("peer.addrinuse_peers");
-        public int NoAccessPeers => GetInt("peer.no_access_peers");
-        public int InvalidArgPeers => GetInt("peer.invalid_arg_peers");
-        public int AbortedPeers => GetInt("peer.aborted_peers");
+        public int ErrorPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ErrorPeers)}"]);
+        public int DisconnectedPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(DisconnectedPeers)}"]);
+        public int EofPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(EofPeers)}"]);
+        public int ConnResetPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ConnResetPeers)}"]);
+        public int ConnRefusedPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ConnRefusedPeers)}"]);
+        public int ConnAbortedPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ConnAbortedPeers)}"]);
+        public int NotConnectedPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NotConnectedPeers)}"]);
+        public int PermPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(PermPeers)}"]);
+        public int BufferPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(BufferPeers)}"]);
+        public int UnreachablePeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(UnreachablePeers)}"]);
+        public int BrokenPipePeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(BrokenPipePeers)}"]);
+        public int AddrInUsePeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(AddrInUsePeers)}"]);
+        public int NoAccessPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NoAccessPeers)}"]);
+        public int InvalidArgPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(InvalidArgPeers)}"]);
+        public int AbortedPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(AbortedPeers)}"]);
 
         // Request counters
-        public int PieceRequests => GetInt("peer.piece_requests");
-        public int MaxPieceRequests => GetInt("peer.max_piece_requests");
-        public int InvalidPieceRequests => GetInt("peer.invalid_piece_requests");
-        public int ChokedPieceRequests => GetInt("peer.choked_piece_requests");
-        public int CancelledPieceRequests => GetInt("peer.cancelled_piece_requests");
-        public int PieceRejects => GetInt("peer.piece_rejects");
+        public int PieceRequests => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(PieceRequests)}"]);
+        public int MaxPieceRequests => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(MaxPieceRequests)}"]);
+        public int InvalidPieceRequests => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(InvalidPieceRequests)}"]);
+        public int ChokedPieceRequests => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ChokedPieceRequests)}"]);
+        public int CancelledPieceRequests => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(CancelledPieceRequests)}"]);
+        public int PieceRejects => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(PieceRejects)}"]);
 
         // Error type counters
-        public int ErrorIncomingPeers => GetInt("peer.error_incoming_peers");
-        public int ErrorOutgoingPeers => GetInt("peer.error_outgoing_peers");
-        public int ErrorRc4Peers => GetInt("peer.error_rc4_peers");
-        public int ErrorEncryptedPeers => GetInt("peer.error_encrypted_peers");
-        public int ErrorTcpPeers => GetInt("peer.error_tcp_peers");
-        public int ErrorUtpPeers => GetInt("peer.error_utp_peers");
+        public int ErrorIncomingPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ErrorIncomingPeers)}"]);
+        public int ErrorOutgoingPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ErrorOutgoingPeers)}"]);
+        public int ErrorRc4Peers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ErrorRc4Peers)}"]);
+        public int ErrorEncryptedPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ErrorEncryptedPeers)}"]);
+        public int ErrorTcpPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ErrorTcpPeers)}"]);
+        public int ErrorUtpPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ErrorUtpPeers)}"]);
 
         // Connection counters
-        public int ConnectTimeouts => GetInt("peer.connect_timeouts");
-        public int UninterestingPeers => GetInt("peer.uninteresting_peers");
-        public int TimeoutPeers => GetInt("peer.timeout_peers");
-        public int NoMemoryPeers => GetInt("peer.no_memory_peers");
-        public int TooManyPeers => GetInt("peer.too_many_peers");
-        public int TransportTimeoutPeers => GetInt("peer.transport_timeout_peers");
-        public int NumBannedPeers => GetInt("peer.num_banned_peers");
-        public int BannedForHashFailure => GetInt("peer.banned_for_hash_failure");
+        public int ConnectTimeouts => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ConnectTimeouts)}"]);
+        public int UninterestingPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(UninterestingPeers)}"]);
+        public int TimeoutPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(TimeoutPeers)}"]);
+        public int NoMemoryPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NoMemoryPeers)}"]);
+        public int TooManyPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(TooManyPeers)}"]);
+        public int TransportTimeoutPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(TransportTimeoutPeers)}"]);
+        public int NumBannedPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumBannedPeers)}"]);
+        public int BannedForHashFailure => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(BannedForHashFailure)}"]);
 
         // Connection attempts
-        public int ConnectionAttempts => GetInt("peer.connection_attempts");
-        public int ConnectionAttemptLoops => GetInt("peer.connection_attempt_loops");
-        public int BoostConnectionAttempts => GetInt("peer.boost_connection_attempts");
-        public int MissedConnectionAttempts => GetInt("peer.missed_connection_attempts");
-        public int NoPeerConnectionAttempts => GetInt("peer.no_peer_connection_attempts");
-        public int IncomingConnections => GetInt("peer.incoming_connections");
+        public int ConnectionAttempts => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ConnectionAttempts)}"]);
+        public int ConnectionAttemptLoops => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(ConnectionAttemptLoops)}"]);
+        public int BoostConnectionAttempts => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(BoostConnectionAttempts)}"]);
+        public int MissedConnectionAttempts => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(MissedConnectionAttempts)}"]);
+        public int NoPeerConnectionAttempts => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NoPeerConnectionAttempts)}"]);
+        public int IncomingConnections => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(IncomingConnections)}"]);
 
         // Peer type counters
-        public int NumTcpPeers => GetInt("peer.num_tcp_peers");
-        public int NumSocks5Peers => GetInt("peer.num_socks5_peers");
-        public int NumHttpProxyPeers => GetInt("peer.num_http_proxy_peers");
-        public int NumUtpPeers => GetInt("peer.num_utp_peers");
-        public int NumI2pPeers => GetInt("peer.num_i2p_peers");
-        public int NumSslPeers => GetInt("peer.num_ssl_peers");
-        public int NumSslSocks5Peers => GetInt("peer.num_ssl_socks5_peers");
-        public int NumSslHttpProxyPeers => GetInt("peer.num_ssl_http_proxy_peers");
-        public int NumSslUtpPeers => GetInt("peer.num_ssl_utp_peers");
+        public int NumTcpPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumTcpPeers)}"]);
+        public int NumSocks5Peers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumSocks5Peers)}"]);
+        public int NumHttpProxyPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumHttpProxyPeers)}"]);
+        public int NumUtpPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumUtpPeers)}"]);
+        public int NumI2pPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumI2pPeers)}"]);
+        public int NumSslPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumSslPeers)}"]);
+        public int NumSslSocks5Peers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumSslSocks5Peers)}"]);
+        public int NumSslHttpProxyPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumSslHttpProxyPeers)}"]);
+        public int NumSslUtpPeers => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumSslUtpPeers)}"]);
 
         // Peer state counters
-        public int NumPeersHalfOpen => GetInt("peer.num_peers_half_open");
-        public int NumPeersConnected => GetInt("peer.num_peers_connected");
-        public int NumPeersUpInterested => GetInt("peer.num_peers_up_interested");
-        public int NumPeersDownInterested => GetInt("peer.num_peers_down_interested");
-        public int NumPeersUpUnchokedAll => GetInt("peer.num_peers_up_unchoked_all");
-        public int NumPeersUpUnchokedOptimistic => GetInt("peer.num_peers_up_unchoked_optimistic");
-        public int NumPeersUpUnchoked => GetInt("peer.num_peers_up_unchoked");
-        public int NumPeersDownUnchoked => GetInt("peer.num_peers_down_unchoked");
-        public int NumPeersUpRequests => GetInt("peer.num_peers_up_requests");
-        public int NumPeersDownRequests => GetInt("peer.num_peers_down_requests");
-        public int NumPeersEndGame => GetInt("peer.num_peers_end_game");
-        public int NumPeersUpDisk => GetInt("peer.num_peers_up_disk");
-        public int NumPeersDownDisk => GetInt("peer.num_peers_down_disk");
+        public int NumPeersHalfOpen => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersHalfOpen)}"]);
+        public int NumPeersConnected => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersConnected)}"]);
+        public int NumPeersUpInterested => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersUpInterested)}"]);
+        public int NumPeersDownInterested => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersDownInterested)}"]);
+        public int NumPeersUpUnchokedAll => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersUpUnchokedAll)}"]);
+        public int NumPeersUpUnchokedOptimistic => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersUpUnchokedOptimistic)}"]);
+        public int NumPeersUpUnchoked => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersUpUnchoked)}"]);
+        public int NumPeersDownUnchoked => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersDownUnchoked)}"]);
+        public int NumPeersUpRequests => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersUpRequests)}"]);
+        public int NumPeersDownRequests => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersDownRequests)}"]);
+        public int NumPeersEndGame => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersEndGame)}"]);
+        public int NumPeersUpDisk => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersUpDisk)}"]);
+        public int NumPeersDownDisk => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Peer)}.{nameof(NumPeersDownDisk)}"]);
     }
 
     /// <summary>
@@ -146,38 +319,38 @@ namespace Delugional
         private bool GetBool(string key) => value.TryGetValue(key, out var v) && Convert.ToBoolean(v);
 
         // Event counters
-        public int OnReadCounter => GetInt("net.on_read_counter");
-        public int OnWriteCounter => GetInt("net.on_write_counter");
-        public int OnTickCounter => GetInt("net.on_tick_counter");
-        public int OnLsdCounter => GetInt("net.on_lsd_counter");
-        public int OnLsdPeerCounter => GetInt("net.on_lsd_peer_counter");
-        public int OnUdpCounter => GetInt("net.on_udp_counter");
-        public int OnAcceptCounter => GetInt("net.on_accept_counter");
-        public int OnDiskQueueCounter => GetInt("net.on_disk_queue_counter");
-        public int OnDiskCounter => GetInt("net.on_disk_counter");
+        public int OnReadCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnReadCounter)}"]);
+        public int OnWriteCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnWriteCounter)}"]);
+        public int OnTickCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnTickCounter)}"]);
+        public int OnLsdCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnLsdCounter)}"]);
+        public int OnLsdPeerCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnLsdPeerCounter)}"]);
+        public int OnUdpCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnUdpCounter)}"]);
+        public int OnAcceptCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnAcceptCounter)}"]);
+        public int OnDiskQueueCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnDiskQueueCounter)}"]);
+        public int OnDiskCounter => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(OnDiskCounter)}"]);
 
         // Sent bytes
-        public long SentPayloadBytes => GetLong("net.sent_payload_bytes");
-        public long SentBytes => GetLong("net.sent_bytes");
-        public long SentIpOverheadBytes => GetLong("net.sent_ip_overhead_bytes");
-        public long SentTrackerBytes => GetLong("net.sent_tracker_bytes");
+        public long SentPayloadBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(SentPayloadBytes)}"]);
+        public long SentBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(SentBytes)}"]);
+        public long SentIpOverheadBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(SentIpOverheadBytes)}"]);
+        public long SentTrackerBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(SentTrackerBytes)}"]);
 
         // Received bytes
-        public long RecvPayloadBytes => GetLong("net.recv_payload_bytes");
-        public long RecvBytes => GetLong("net.recv_bytes");
-        public long RecvIpOverheadBytes => GetLong("net.recv_ip_overhead_bytes");
-        public long RecvTrackerBytes => GetLong("net.recv_tracker_bytes");
-        public long RecvFailedBytes => GetLong("net.recv_failed_bytes");
-        public long RecvRedundantBytes => GetLong("net.recv_redundant_bytes");
+        public long RecvPayloadBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(RecvPayloadBytes)}"]);
+        public long RecvBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(RecvBytes)}"]);
+        public long RecvIpOverheadBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(RecvIpOverheadBytes)}"]);
+        public long RecvTrackerBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(RecvTrackerBytes)}"]);
+        public long RecvFailedBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(RecvFailedBytes)}"]);
+        public long RecvRedundantBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(RecvRedundantBytes)}"]);
 
         // Limiter stats
-        public int LimiterUpQueue => GetInt("net.limiter_up_queue");
-        public int LimiterDownQueue => GetInt("net.limiter_down_queue");
-        public long LimiterUpBytes => GetLong("net.limiter_up_bytes");
-        public long LimiterDownBytes => GetLong("net.limiter_down_bytes");
+        public int LimiterUpQueue => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(LimiterUpQueue)}"]);
+        public int LimiterDownQueue => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(LimiterDownQueue)}"]);
+        public long LimiterUpBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(LimiterUpBytes)}"]);
+        public long LimiterDownBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(LimiterDownBytes)}"]);
 
         // Connection status
-        public bool HasIncomingConnections => GetBool("net.has_incoming_connections");
+        public bool HasIncomingConnections => GetBool(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Net)}.{nameof(HasIncomingConnections)}"]);
     }
 
     /// <summary>
@@ -195,21 +368,21 @@ namespace Delugional
         private int GetInt(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt32(v) : 0;
 
         // Torrent state counters
-        public int NumCheckingTorrents => GetInt("ses.num_checking_torrents");
-        public int NumStoppedTorrents => GetInt("ses.num_stopped_torrents");
-        public int NumUploadOnlyTorrents => GetInt("ses.num_upload_only_torrents");
-        public int NumDownloadingTorrents => GetInt("ses.num_downloading_torrents");
-        public int NumSeedingTorrents => GetInt("ses.num_seeding_torrents");
-        public int NumQueuedSeedingTorrents => GetInt("ses.num_queued_seeding_torrents");
-        public int NumQueuedDownloadTorrents => GetInt("ses.num_queued_download_torrents");
-        public int NumErrorTorrents => GetInt("ses.num_error_torrents");
-        public int NonFilterTorrents => GetInt("ses.non_filter_torrents");
+        public int NumCheckingTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumCheckingTorrents)}"]);
+        public int NumStoppedTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumStoppedTorrents)}"]);
+        public int NumUploadOnlyTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumUploadOnlyTorrents)}"]);
+        public int NumDownloadingTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumDownloadingTorrents)}"]);
+        public int NumSeedingTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumSeedingTorrents)}"]);
+        public int NumQueuedSeedingTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumQueuedSeedingTorrents)}"]);
+        public int NumQueuedDownloadTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumQueuedDownloadTorrents)}"]);
+        public int NumErrorTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumErrorTorrents)}"]);
+        public int NonFilterTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NonFilterTorrents)}"]);
 
         // Piece statistics
-        public int NumPiecePassed => GetInt("ses.num_piece_passed");
-        public int NumPieceFailed => GetInt("ses.num_piece_failed");
-        public int NumHavePieces => GetInt("ses.num_have_pieces");
-        public int NumTotalPiecesAdded => GetInt("ses.num_total_pieces_added");
+        public int NumPiecePassed => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumPiecePassed)}"]);
+        public int NumPieceFailed => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumPieceFailed)}"]);
+        public int NumHavePieces => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumHavePieces)}"]);
+        public int NumTotalPiecesAdded => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Ses)}.{nameof(NumTotalPiecesAdded)}"]);
     }
 
     /// <summary>
@@ -228,22 +401,22 @@ namespace Delugional
         private long GetLong(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt64(v) : 0L;
 
         // Disk I/O counters
-        public long DiskBlocksInUse => GetLong("disk.disk_blocks_in_use");
-        public int BlocksWritten => GetInt("disk.blocks_written");
-        public int BlocksRead => GetInt("disk.blocks_read");
-        public int BlocksReadHit => GetInt("disk.blocks_read_hit");
-        public long WritesCached => GetLong("disk.writes_cached");
-        public long ReadsCached => GetLong("disk.reads_cached");
-        public long QueuedWriteBytes => GetLong("disk.queued_write_bytes");
-        public int QueuedJobs => GetInt("disk.queued_jobs");
-        public int PeakQueuedJobs => GetInt("disk.peak_queued_jobs");
-        public int PendingReadingJobs => GetInt("disk.pending_reading_jobs");
-        public int RunningThreads => GetInt("disk.running_threads");
-        public int FencedReadJobs => GetInt("disk.fenced_read_jobs");
-        public int FencedWriteJobs => GetInt("disk.fenced_write_jobs");
-        public int BlockedJobs => GetInt("disk.blocked_jobs");
-        public int NumWritingThreads => GetInt("disk.num_writing_threads");
-        public int NumRunningThreads => GetInt("disk.num_running_threads");
+        public long DiskBlocksInUse => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(DiskBlocksInUse)}"]);
+        public int BlocksWritten => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(BlocksWritten)}"]);
+        public int BlocksRead => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(BlocksRead)}"]);
+        public int BlocksReadHit => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(BlocksReadHit)}"]);
+        public long WritesCached => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(WritesCached)}"]);
+        public long ReadsCached => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(ReadsCached)}"]);
+        public long QueuedWriteBytes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(QueuedWriteBytes)}"]);
+        public int QueuedJobs => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(QueuedJobs)}"]);
+        public int PeakQueuedJobs => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(PeakQueuedJobs)}"]);
+        public int PendingReadingJobs => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(PendingReadingJobs)}"]);
+        public int RunningThreads => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(RunningThreads)}"]);
+        public int FencedReadJobs => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(FencedReadJobs)}"]);
+        public int FencedWriteJobs => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(FencedWriteJobs)}"]);
+        public int BlockedJobs => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(BlockedJobs)}"]);
+        public int NumWritingThreads => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(NumWritingThreads)}"]);
+        public int NumRunningThreads => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Disk)}.{nameof(NumRunningThreads)}"]);
     }
 
     /// <summary>
@@ -261,11 +434,11 @@ namespace Delugional
         private int GetInt(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt32(v) : 0;
         private long GetLong(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt64(v) : 0L;
 
-        public int DhtNodes => GetInt("dht.dht_nodes");
-        public int DhtNodeCache => GetInt("dht.dht_node_cache");
-        public int DhtTorrents => GetInt("dht.dht_torrents");
-        public long DhtGlobalNodes => GetLong("dht.dht_global_nodes");
-        public int DhtTotalAllocations => GetInt("dht.dht_total_allocations");
+        public int DhtNodes => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Dht)}.{nameof(DhtNodes)}"]);
+        public int DhtNodeCache => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Dht)}.{nameof(DhtNodeCache)}"]);
+        public int DhtTorrents => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Dht)}.{nameof(DhtTorrents)}"]);
+        public long DhtGlobalNodes => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Dht)}.{nameof(DhtGlobalNodes)}"]);
+        public int DhtTotalAllocations => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Dht)}.{nameof(DhtTotalAllocations)}"]);
     }
 
     /// <summary>
@@ -282,7 +455,7 @@ namespace Delugional
 
         private int GetInt(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt32(v) : 0;
 
-        public int TrackerRequestTimeouts => GetInt("ses.num_incoming_tracker");
+        public int TrackerRequestTimeouts => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Tracker)}.{nameof(TrackerRequestTimeouts)}"]);
     }
 
     /// <summary>
@@ -300,17 +473,17 @@ namespace Delugional
         private int GetInt(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt32(v) : 0;
         private long GetLong(string key) => value.TryGetValue(key, out var v) ? Convert.ToInt64(v) : 0L;
 
-        public int UtpPacketLoss => GetInt("utp.utp_packet_loss");
-        public int UtpTimeout => GetInt("utp.utp_timeout");
-        public int UtpPacketsIn => GetInt("utp.utp_packets_in");
-        public int UtpPacketsOut => GetInt("utp.utp_packets_out");
-        public long UtpFastRetransmit => GetLong("utp.utp_fast_retransmit");
-        public long UtpPacketResend => GetLong("utp.utp_packet_resend");
-        public long UtpSamplesAboveTarget => GetLong("utp.utp_samples_above_target");
-        public long UtpSamplesBelowTarget => GetLong("utp.utp_samples_below_target");
-        public long UtpPayloadPktsIn => GetLong("utp.utp_payload_pkts_in");
-        public long UtpPayloadPktsOut => GetLong("utp.utp_payload_pkts_out");
-        public long UtpInvalidPktsIn => GetLong("utp.utp_invalid_pkts_in");
-        public long UtpRedundantPktsIn => GetLong("utp.utp_redundant_pkts_in");
+        public int UtpPacketLoss => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpPacketLoss)}"]);
+        public int UtpTimeout => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpTimeout)}"]);
+        public int UtpPacketsIn => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpPacketsIn)}"]);
+        public int UtpPacketsOut => GetInt(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpPacketsOut)}"]);
+        public long UtpFastRetransmit => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpFastRetransmit)}"]);
+        public long UtpPacketResend => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpPacketResend)}"]);
+        public long UtpSamplesAboveTarget => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpSamplesAboveTarget)}"]);
+        public long UtpSamplesBelowTarget => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpSamplesBelowTarget)}"]);
+        public long UtpPayloadPktsIn => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpPayloadPktsIn)}"]);
+        public long UtpPayloadPktsOut => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpPayloadPktsOut)}"]);
+        public long UtpInvalidPktsIn => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpInvalidPktsIn)}"]);
+        public long UtpRedundantPktsIn => GetLong(SessionStatus.PropertyNameMappings[$"{nameof(SessionStatus.Utp)}.{nameof(UtpRedundantPktsIn)}"]);
     }
 }
