@@ -137,10 +137,10 @@ namespace DelugionalTests
         public async Task GetTorrentStatus()
         {
             var torrentId = await AddMagnetAsync();
-            IDictionary<string, object> status = await deluge.GetTorrentStatusAsync(torrentId, [BuiltInStatuses.Name, BuiltInStatuses.ActiveTime]);
+            IDictionary<string, object> status = await deluge.GetTorrentStatusAsync(torrentId, BuiltInStatuses.AllStatuses);
 
             Assert.IsNotNull(status, "status != null");
-            Assert.AreEqual(2, status.Count, "status.Count == 2");
+            // Don't check the expected count of status keys since it can vary based Deluge version.
             Assert.IsTrue(status.ContainsKey(BuiltInStatuses.Name), "status.ContainsKey(BuiltInStatuses.Name)");
             Assert.IsTrue(status.ContainsKey(BuiltInStatuses.ActiveTime), "status.ContainsKey(BuiltInStatuses.ActiveTime)");
         }
