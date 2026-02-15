@@ -61,7 +61,7 @@ namespace DelugionalTests {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to magnet:?xt=urn:btih:3F19B149F53A50E14FC0B79926A391896EABAB6F&amp;dn=ubuntu+15+10+desktop+64+bit&amp;tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce.
+        ///   Looks up a localized string similar to magnet:?xt=urn:btih:3F19B149F53A50E14FC0B79926A391896EABAB6F&amp;dn=ubuntu-15.10-desktop-amd64.iso&amp;tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce.
         /// </summary>
         internal static string MagnetLink1 {
             get {

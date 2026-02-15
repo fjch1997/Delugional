@@ -54,9 +54,12 @@ namespace Delugional
             return dict;
         }
 
-        public async Task<object> GetSessionStatusAsync(string[] keys)
+        public async Task<SessionStatus> GetSessionStatusAsync(string[] keys = null)
         {
-            return await CallAsync("core.get_session_status", (object)keys);
+            if (keys == null)
+                keys = new string[0];
+            var result = await CallAsync("core.get_session_status", (object)keys);
+            return new SessionStatus(result);
         }
 
         public async Task<TorrentStatus> GetTorrentStatusAsync(string torrentId, string[] statusKeys = null, bool diff = false)

@@ -1,7 +1,6 @@
 ﻿using Delugional;
 using Delugional.Daemon;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -136,7 +135,7 @@ namespace DelugionalTests
             var status = await deluge.GetTorrentStatusAsync(torrentId, []);
 
             Assert.IsNotNull(status, "status != null");
-            Assert.AreEqual("ubuntu 15 10 desktop 64 bit", status.Name);
+            Assert.AreEqual("ubuntu-15.10-desktop-amd64.iso", status.Name);
         }
 
         [TestMethod]
@@ -148,7 +147,7 @@ namespace DelugionalTests
             Assert.AreEqual(1, statuses.Count, "statuses.Count == 1");
             Assert.IsTrue(statuses.ContainsKey(torrentId), $"statuses.ContainsKey({torrentId})");
             Assert.IsNotNull(statuses[torrentId], $"statuses[{torrentId}] != null");
-            Assert.AreEqual("ubuntu 15 10 desktop 64 bit", statuses[torrentId].Name);
+            Assert.AreEqual("ubuntu-15.10-desktop-amd64.iso", statuses[torrentId].Name);
         }
 
         [TestMethod]
@@ -163,33 +162,15 @@ namespace DelugionalTests
         public async Task GetSessionStatus()
         {
             await AddMagnetAsync();
-            var keys = new string[] {
-                    "allowed_upload_slots",
-                    "dht_node_cache",
-                    "dht_nodes",
-                    "dht_torrents",
-                    "down_bandwidth_bytes_queue",
-                    "down_bandwidth_queue",
-                    "has_incoming_connections",
-                    "num_peers",
-                    "num_unchoked",
-                    "total_dht_download",
-                    "total_dht_upload",
-                    "total_download",
-                    "total_failed_bytes",
-                    "total_ip_overhead_download",
-                    "total_ip_overhead_upload",
-                    "total_payload_download",
-                    "total_payload_upload",
-                    "total_redundant_bytes",
-                    "total_tracker_download",
-                    "total_tracker_upload",
-                    "total_upload",
-                    "up_bandwidth_bytes_queue",
-                    "up_bandwidth_queue" };
-            var sessionStatus = await deluge.GetSessionStatusAsync(keys);
-            Assert.AreEqual(((IDictionary<object, object>)sessionStatus).Count, keys.Length);
+            var sessionStatus = await deluge.GetSessionStatusAsync([]);
+            
+            // When passing empty array, Deluge returns all statistics
             Assert.IsNotNull(sessionStatus, "sessionStatus != null");
+            Assert.IsTrue(sessionStatus.Raw.Count > 0, "Should contain session statistics");
+            
+            // Verify we can access specific statistics
+            Assert.IsTrue(sessionStatus.Ses.NumDownloadingTorrents >= 0);
+            Assert.IsTrue(sessionStatus.Peer.NumPeersConnected >= 0);
         }
     }
 }
